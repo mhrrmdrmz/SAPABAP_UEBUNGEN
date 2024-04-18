@@ -1,0 +1,52 @@
+*&---------------------------------------------------------------------*
+*& Report ZMD_UEBUNG_3
+*&---------------------------------------------------------------------*
+*&Dieser Code definiert ein Auswahlbildschirm (Selection-Screen) mit zwei Blöcken,
+*&in denen jeweils Parameter für Vorname, Nachname und Informationen
+*&zur Groß-/Kleinschreibung festgelegt werden. Der Zweck dieses Codes besteht darin,
+*&dem Benutzer die Eingabe von Vor- und Nachnamen zu ermöglichen, diese zu kombinieren
+*&und je nach Auswahl des Benutzers in Groß- oder Kleinbuchstaben umzuwandeln.
+*&PARAMETERS / SELECTION-SCREEN BEGIN/END OF BLOCK / DATA / CONCATENATE / IF-ELSEIF
+*&---------------------------------------------------------------------*
+REPORT zmd_uebung_03.
+
+"Selektion-Screen und 2 Parameter werden darin definiert, Name und Nachname werden vom Benutzer übernommen.
+SELECTION-SCREEN BEGIN OF BLOCK a1 WITH FRAME TITLE TEXT-001 NO INTERVALS.
+
+PARAMETERS: p_name  TYPE c LENGTH 20,
+            p_sname TYPE c LENGTH 20.
+
+SELECTION-SCREEN END OF BLOCK a1.
+
+"Das zweite Selektion-Screen wird definiert und die Informationen GROSSBUCHSTABE,
+"KLEINBUCHSTABE werden vom Benutzer empfangen.
+"Außerdem wird ein Ankreuzfeld für den Informationstyp erstellt.
+SELECTION-SCREEN BEGIN OF BLOCK a2 WITH FRAME TITLE TEXT-002 NO INTERVALS.
+PARAMETERS: p_rb_up  RADIOBUTTON GROUP abc,
+            p_rb_low RADIOBUTTON GROUP abc,
+            p_cbx_in AS CHECKBOX.
+SELECTION-SCREEN END OF BLOCK a2.
+
+DATA: gv_fullname TYPE string.
+
+"Die eingegebenen Informationen zu Vor- und Nachnamen werden kombiniert.
+CONCATENATE p_name p_sname INTO gv_fullname SEPARATED BY space.
+
+"Wir erstellen alles in Klein- oder Großbuchstaben gemäß den Wünschen des Benutzers.
+IF p_rb_up = abap_true. "Alternative--> IF p_rb_up = 'X'.      "Alternative--> IF p_rb_up IS NOT INITIAL.
+
+  TRANSLATE gv_fullname TO UPPER CASE.
+
+ELSEIF p_rb_low = abap_true.
+
+  TRANSLATE gv_fullname TO LOWER CASE.
+
+ENDIF.
+
+"Wenn das Kontrollkästchen (Checkbox) ausgewählt ist, informieren wir durch eine Nachricht;
+"wenn nicht, drucken wir eine Benachrichtigung auf dem Bildschirm aus.
+IF p_cbx_in = abap_true.
+  MESSAGE gv_fullname TYPE 'I'.
+ELSE.
+  WRITE: gv_fullname.
+ENDIF.
