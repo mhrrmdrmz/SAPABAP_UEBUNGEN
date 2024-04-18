@@ -1,0 +1,66 @@
+*&---------------------------------------------------------------------*
+*& Report ZDM_UEBUNG_9.
+*&---------------------------------------------------------------------*
+*&VERWENDUNG EINER KLASSE MIT STATISCHEN METHODEN.
+*&Der Zweck dieses Codes besteht darin, dem Benutzer die Möglichkeit zu geben,
+*&Daten aus verschiedenen Datenbanktabellen basierend auf ausgewählten Kriterien abzurufen
+*&und anzuzeigen. Die Auswahl der abzurufenden Tabellen erfolgt über Radiobuttons auf dem Selektionsbildschirm.
+*&---------------------------------------------------------------------*
+REPORT zmd_uebung_09.
+
+"Ich erstelle einen SELECTION-SCREEN und erhalte vom Benutzer eine CARRID-Information
+"sowie den Namen der Tabelle (oder alle), die aus der Datenbank gelesen werden soll.
+SELECTION-SCREEN BEGIN OF BLOCK a1 WITH FRAME TITLE TEXT-001.
+PARAMETERS: p_carrid TYPE s_carr_id,
+            p_scarr  RADIOBUTTON GROUP abc,
+            p_spfli  RADIOBUTTON GROUP abc,
+            p_sflght RADIOBUTTON GROUP abc,
+            p_all    RADIOBUTTON GROUP abc.
+SELECTION-SCREEN END OF BLOCK a1.
+
+"erarbeitung von definitionen.
+DATA: gt_scarr   TYPE TABLE OF scarr,
+      gt_spfli   TYPE TABLE OF spfli,
+      gt_sflight TYPE TABLE OF sflight.
+
+START-OF-SELECTION.
+
+  "Ich lese die erforderlichen Datenbanktabellen anhand der vom Benutzer eingegebenen Daten
+  "und speichere sie in einer internen Tabelle.
+  IF p_scarr IS NOT INITIAL.
+
+    zflight_data_dm=>get_scarr(
+      EXPORTING
+        iv_carrid = p_carrid
+      IMPORTING
+        et_scarr  = gt_scarr ).
+
+  ELSEIF p_spfli IS NOT INITIAL.
+
+    zflight_data_dm=>get_spfli(
+      EXPORTING
+        iv_carrid = p_carrid
+      IMPORTING
+        et_spfli  = gt_spfli ).
+
+  ELSEIF p_sflght IS NOT INITIAL.
+
+    zflight_data_dm=>get_sflight(
+      EXPORTING
+        iv_carrid  = p_carrid
+      IMPORTING
+        et_sflight = gt_sflight ).
+
+  ELSEIF p_all IS NOT INITIAL.
+
+    zflight_data_dm=>get_all(
+      EXPORTING
+        iv_carrid  = p_carrid
+      IMPORTING
+        et_scarr   = gt_scarr
+        et_spfli   = gt_spfli
+        et_sflight = gt_sflight ).
+  ENDIF.
+
+  "Anschließend können Sie den Druck auf dem Bildschirm fortsetzen oder
+  "den ALV (Abkürzung für 'ALV List Viewer') abrufen..
