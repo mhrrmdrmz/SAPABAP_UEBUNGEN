@@ -1,0 +1,267 @@
+*&---------------------------------------------------------------------*
+*& Report ZMD_UEBUNG_11
+*&---------------------------------------------------------------------*
+"Log-Datei (Protokolldatei) Einträge / Hinzufügung und Speicherung :
+"Dieser SAP-ABAP-Code hat den Zweck, eine Reihe von Aktionen durchzuführen,
+"die mit der Bearbeitung von Reisedaten in einer bestimmten Tabelle
+"(hier "zdm_stravelag") in SAP zusammenhängen. Zusammenfassend lässt sich sagen,
+"dass der Code dazu dient, eine Benutzereingabe zu validieren, eine Datenbanktabelle
+"zu aktualisieren und die durchgeführten Aktionen zu protokollieren.
+*&---------------------------------------------------------------------*
+REPORT zmd_uebung_11.
+
+"Auswahlbildschirm: Der Code definiert einen Auswahlbildschirm, auf dem der Benutzer
+"Parameter wie die Agenturnummer und den Namen eingeben kann.
+SELECTION-SCREEN BEGIN OF BLOCK a1 WITH FRAME TITLE TEXT-001.
+PARAMETERS: p_agnum TYPE s_agncynum OBLIGATORY,
+            p_name  TYPE string LOWER CASE.
+SELECTION-SCREEN END OF BLOCK a1.
+
+DATA: gs_log_info       TYPE bal_s_log,
+      gs_bal_log        TYPE bal_s_msg,
+      gv_log_handle     TYPE balloghndl,
+      gv_timestamp      TYPE tzntstmps,
+      gs_stravelag      TYPE zdm_stravelag,
+      gv_number_of_char TYPE i.
+
+CONSTANTS: gc_object     TYPE balobj_d  VALUE 'ZDM_OBJ_1',
+           gc_sub_object TYPE balsubobj VALUE 'ZDM_SUB_1'.
+
+START-OF-SELECTION.
+
+  PERFORM prep_log.
+  PERFORM first_log.
+  PERFORM check_id.
+  PERFORM check_name.
+  PERFORM update.
+  PERFORM save_log.
+
+FORM prep_log.
+  "Log-Vorbereitung: Es werden Vorbereitungen für das Logging getroffen, indem ein
+  "Zeitstempel erstellt und ein Log-Eintrag vorbereitet wird.
+  "Die Variable "gv_timestamp", die erstellt wird, wird im Format YYYYMMDDHHMMSS sein.
+  CONVERT DATE sy-datum TIME sy-uzeit INTO TIME STAMP gv_timestamp TIME ZONE sy-zonlo.
+
+  "Um LOG erstellen zu können, müssen wir zuerst eine Sequenznummer erhalten.
+  "Um diese Sequenznummer zu erhalten, muss die folgende Zeile vorbereitet werden.
+  "Bei der Vorbereitung dieser Zeile werden das zuvor erstellte Objekt, das Unterobjekt und der Zeitstempel verwendet.
+  gs_log_info-object    = gc_object.
+  gs_log_info-subobject = gc_sub_object.
+  gs_log_info-extnumber = gv_timestamp.
+  CONDENSE gs_log_info-extnumber.
+
+  "Wir möchten, dass der erstellte Datensatz automatisch nach 2 Wochen gelöscht wird."
+  "Daher berechnen wir das Datum von heute plus 2 Wochen und speichern es
+  "in das Feld 'aldate_del' der vorbereiteten Zeile.
+*  CALL FUNCTION 'ADD_TIME_TO_DATE'
+*    EXPORTING
+*      i_idate               = sy-datum
+*      i_time                = 2   "2 Mal (2*1 Woche=14 Tage)
+*      i_iprkz               = '1' "Bedeutung: 1=Woche; 2=Monat; 3=Jahr)
+*    IMPORTING
+*      o_idate               = gs_log_info-aldate_del
+*    EXCEPTIONS
+*      invalid_period        = 1
+*      invalid_round_up_rule = 2
+*      internal_error        = 3
+*      OTHERS                = 4.
+
+  "Oben wurde eine alternative Methode erstellt, ohne die Funktion 'ADD_TIME_TO_DATE' zu verwenden."
+  "Wir möchten, dass erstellte Log-Datei (Protokolldatei) automatisch nach 2 Wochen gelöscht wird."
+  gs_log_info-aldate_del = sy-datum + 14.
+
+
+  IF sy-subrc IS NOT INITIAL.
+    LEAVE PROGRAM.
+  ENDIF.
+
+  "Anhand der vorbereiteten Zeile erstellen wir eine laufende Nummer.
+  CALL FUNCTION 'BAL_LOG_CREATE'
+    EXPORTING
+      i_s_log                 = gs_log_info
+    IMPORTING
+      e_log_handle            = gv_log_handle
+    EXCEPTIONS
+      log_header_inconsistent = 1
+      OTHERS                  = 2.
+
+  IF sy-subrc IS NOT INITIAL.
+    LEAVE PROGRAM.
+  ENDIF.
+ENDFORM.
+
+FORM first_log.
+
+  "Die Zeile für die erste Protokolsatz (Log-satz) wird ausgefüllt.
+  gs_bal_log-msgty = 'S'.
+  gs_bal_log-msgid = 'ZDM_MSG_CLASS_1'.
+  gs_bal_log-msgno = 12.
+  gs_bal_log-msgv1 = sy-datum.
+  gs_bal_log-msgv2 = sy-uzeit.
+  gs_bal_log-msgv3 = sy-uname.
+
+  "Der erste Protokolsatz (Log-satz) Eintrag wird hinzugefügt.
+  PERFORM add_log.
+
+  "Die Zeile für die zweite Protokolsatz (Log-satz ) wird ausgefüllt.
+  gs_bal_log-msgty = 'S'.
+  gs_bal_log-msgid = 'ZDM_MSG_CLASS_1'.
+  gs_bal_log-msgno = 13.
+  gs_bal_log-msgv1 = p_agnum.
+  gs_bal_log-msgv2 = p_name.
+
+  "Die zweite Protokolsatz (Log-satz ) Eintrag wird hinzugefügt.
+  PERFORM add_log.
+
+ENDFORM.
+
+FORM check_id.
+  SELECT SINGLE * FROM zdm_stravelag
+    INTO gs_stravelag
+    WHERE agencynum = p_agnum.
+
+  IF gs_stravelag IS INITIAL.
+    "Es wird ein Protokolsatz (Log-satz) darüber erstellt,
+    "dass die gesuchte Zeile nicht gefunden werden konnte.
+    gs_bal_log-msgty = 'E'.
+    gs_bal_log-msgid = 'ZDM_MSG_CLASS_1'.
+    gs_bal_log-msgno = 14.
+    gs_bal_log-msgv1 = p_agnum.
+
+    "Der Protokolsatz (Log-satz) ist hinzugefügt.
+    PERFORM add_log.
+
+    "Die hinzugefügten Protokolsatz (Log-satz ) werden im System
+    "gespeichert und beendet.
+    PERFORM save_log.
+    LEAVE PROGRAM.
+  ELSE.
+    "Der Protokolsatz (Log-satz), dass die gesuchte Zeile gefunden wurde, wird gefüllt.
+    gs_bal_log-msgty = 'S'.
+    gs_bal_log-msgid = 'ZDM_MSG_CLASS_1'.
+    gs_bal_log-msgno = 15.
+    gs_bal_log-msgv1 = p_agnum.
+
+    "Der Protokolsatz (Log-satz) wird wird hinzugefügt.
+    PERFORM add_log.
+  ENDIF.
+ENDFORM.
+
+FORM check_name.
+  IF p_name IS INITIAL.
+    "Der Protokollsatz wird so gefüllt, dass der neue Firmenname aus dem Selektionsbild leer ist.
+    gs_bal_log-msgty = 'E'.
+    gs_bal_log-msgid = 'ZDM_MSG_CLASS_1'.
+    gs_bal_log-msgno = 16.
+
+    "Der Protokolsatz (Log-satz) ist hinzugefügt.
+    PERFORM add_log.
+
+    "Die hinzugefügten Protokolsatz (Log-satz ) werden im System
+    "gespeichert und beendet.
+    PERFORM save_log.
+    LEAVE PROGRAM.
+  ELSE.
+    "Der Protokollsatz wird so gefüllt, dass der neue Firmenname aus dem Selektionsbild nicht leer ist.
+    gs_bal_log-msgty = 'S'.
+    gs_bal_log-msgid = 'ZDM_MSG_CLASS_1'.
+    gs_bal_log-msgno = 17.
+
+    "Der Protokolsatz (Log-satz) ist hinzugefügt.
+    PERFORM add_log.
+  ENDIF.
+
+  gv_number_of_char = strlen( p_name ).
+
+  IF gv_number_of_char > 25.
+    "Der Protokolleintrag ist so gefüllt, dass der neu eingegebene Name größer als 25 Zeichen ist.
+    gs_bal_log-msgty = 'E'.
+    gs_bal_log-msgid = 'ZDM_MSG_CLASS_1'.
+    gs_bal_log-msgno = 18.
+    gs_bal_log-msgv1 = p_name.
+
+    "Der Protokolsatz (Log-satz) ist hinzugefügt.
+    PERFORM add_log.
+
+    "Die hinzugefügten Protokolsatz (Log-satz ) werden im System
+    "gespeichert und beendet.
+    PERFORM save_log.
+    LEAVE PROGRAM.
+  ELSE.
+    "Der Protokolleintrag ist so gefüllt, dass der neu eingegebene Name nicht größer als 25 Zeichen ist.
+    gs_bal_log-msgty = 'S'.
+    gs_bal_log-msgid = 'ZDM_MSG_CLASS_1'.
+    gs_bal_log-msgno = 19.
+    gs_bal_log-msgv1 = p_name.
+
+    "Der Protokolsatz (Log-satz) ist hinzugefügt.
+    PERFORM add_log.
+  ENDIF.
+ENDFORM.
+
+FORM update.
+  UPDATE zdm_stravelag SET   name      = p_name
+                       WHERE agencynum = p_agnum.
+
+  IF sy-subrc IS NOT INITIAL.
+    "Ein Protokolsatzt wird ausgefüllt, um anzuzeigen,
+    "dass der Aktualisierungsvorgang nicht erfolgreich war.
+    gs_bal_log-msgty = 'E'.
+    gs_bal_log-msgid = 'ZDM_MSG_CLASS_1'.
+    gs_bal_log-msgno = 20.
+
+    "Der Protokolsatz (Log-satz) ist hinzugefügt.
+    PERFORM add_log.
+
+    "Die hinzugefügten Protokolsatz (Log-satz ) werden im System
+    "gespeichert und beendet.
+    PERFORM save_log.
+    LEAVE PROGRAM.
+  ELSE.
+    "Ein Protokolsatzt wird ausgefüllt, um anzuzeigen,
+    "dass der Aktualisierungsvorgang nicht erfolgreich war.
+    gs_bal_log-msgty = 'S'.
+    gs_bal_log-msgid = 'ZDM_MSG_CLASS_1'.
+    gs_bal_log-msgno = 21.
+
+    "Die hinzugefügten Protokolsatz (Log-satz ) werden im System
+    "gespeichert und beendet.
+    PERFORM add_log.
+  ENDIF.
+ENDFORM.
+
+FORM add_log.
+  "Log-Hinzufügung: Während des Prozesses werden verschiedene Log-Einträge
+  "hinzugefügt, um die durchgeführten Aktionen zu dokumentieren.
+  CALL FUNCTION 'BAL_LOG_MSG_ADD'
+    EXPORTING
+      i_log_handle     = gv_log_handle
+      i_s_msg          = gs_bal_log
+    EXCEPTIONS
+      log_not_found    = 1
+      msg_inconsistent = 2
+      log_is_full      = 3
+      OTHERS           = 4.
+
+  IF sy-subrc IS NOT INITIAL.
+    LEAVE PROGRAM.
+  ENDIF.
+
+  CLEAR: gs_bal_log.
+ENDFORM.
+
+FORM save_log.
+  "Log-Speicherung: Diese Log-Einträge werden dann gespeichert.
+  CALL FUNCTION 'BAL_DB_SAVE'
+    EXPORTING
+      i_save_all       = abap_true
+    EXCEPTIONS
+      log_not_found    = 1
+      save_not_allowed = 2
+      numbering_error  = 3
+      OTHERS           = 4.
+
+  IF sy-subrc IS NOT INITIAL.
+    LEAVE PROGRAM.
+  ENDIF.
+ENDFORM.
