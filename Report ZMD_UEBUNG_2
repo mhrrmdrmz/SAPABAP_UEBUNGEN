@@ -1,0 +1,85 @@
+*&---------------------------------------------------------------------*
+*& Report ZMD_UEBUNG_2
+*&---------------------------------------------------------------------*
+*&CASE-Anweisung (vor SAP 7.40) oder einer CONDİTİON-Anweisung (ab SAP 7.40) :
+*&Ähnlich wie die IF-ENDIF-Anweisung ermöglicht sie die Programmierung für verschiedene
+*&Bedingungen, erfordert jedoch zunächst eine vorhandene Information (z. B. eine Zahl oder einen Text).
+*&Der Zweck des Codes besteht darin, den Wochentag basierend auf einer numerischen
+*&Eingabe zu bestimmen und anzuzeigen, wobei unterschiedliche Methoden für verschiedene
+*&SAP-Versionen verwendet werden.
+*&PARAMETERS-Anweisung: Hier wird ein Parameter namens "p_day" definiert,
+*&der eine Tageszahl vom Benutzer annimmt.
+*&CASE-Anweisung: Die eingegebene Tageszahl wird mit verschiedenen Werten verglichen.
+*&Je nach Wert wird der entsprechende Wochentag in der Variable "gv_day" gespeichert.
+*&WHEN OTHERS: Falls die eingegebene Tageszahl nicht zwischen 1 und 7 liegt,
+*&wird eine Fehlermeldung angezeigt.
+*&IF-Anweisung: Überprüft, ob die eingegebene Zahl zwischen 1 und 7 liegt.
+*&Wenn ja, wird eine Meldung mit dem Wochentag angezeigt.
+*&TEXT-001  Bitte geben Sie eine Zahl zwischen 1 und 7 ein.
+*&TEXT-002  Die Anzahl der Tage, die der von Ihnen eingegebenen Zahl entspricht:
+*&---------------------------------------------------------------------*
+REPORT zmd_uebung_2.
+
+"Cond-when then else
+"COND: Die COND-Anweisung ermöglicht bedingte Ausdrücke. Sie können mehrere Bedingungen
+"mit WHEN und den entsprechenden Ausdrücken definieren und dann eine Bedingung mit ELSE festlegen,
+"die ausgeführt wird, wenn keine der vorherigen Bedingungen zutrifft.
+
+"Dem Benutzer wird eine Tageszahl entnommen.
+PARAMETERS: p_day TYPE n. "Alternative Definition--> PARAMETERS: p_day TYPE i.
+
+"Die Definitionen werden erstellt.
+DATA: gv_day_1 TYPE string,
+      gv_day_2 TYPE string,
+      gv_msg   TYPE string.
+
+"Beispiel für Version vor SAP 7.40
+"Anhand der eingegebenen Anzahl von Tagen wird der entsprechende Tag gefunden.
+CASE p_day.
+  WHEN 1.
+    gv_day_1 = 'Montag'.
+  WHEN 2.
+    gv_day_1 = 'Dienstag'.
+  WHEN 3.
+    gv_day_1 = 'Mittwoch'.
+  WHEN 4.
+    gv_day_1 = 'Donnerstag'.
+  WHEN 5.
+    gv_day_1 = 'Freitag'.
+  WHEN 6.
+    gv_day_1 = 'Samstag'.
+  WHEN 7.
+    gv_day_1 = 'Sonntag'.
+  WHEN OTHERS.
+    MESSAGE TEXT-001 TYPE 'S' DISPLAY LIKE 'E'.
+ENDCASE.
+
+"CONCATENATE: Die CONCATENATE-Anweisung wird verwendet, um Zeichenfolgen zu verketten.
+"Sie können mehrere Zeichenfolgen mit INTO zu einer einzelnen Zeichenfolge zusammenfügen.
+
+"Der Benutzer wird informiert, wenn die eingegebene Zahl zwischen 1 und 7 liegt.
+IF p_day BETWEEN 1 AND 7.
+  CONCATENATE TEXT-002 gv_day_1 INTO gv_msg SEPARATED BY space.
+  MESSAGE gv_msg TYPE 'I'.
+ENDIF.
+
+
+"Beispiel für SAP ab 7.40
+
+gv_day_2 = COND #( WHEN p_day = 1 THEN 'Montag'
+                   WHEN p_day = 2 THEN 'Dienstag'
+                   WHEN p_day = 3 THEN 'Mittwoch'
+                   WHEN p_day = 4 THEN 'Donnerstag'
+                   WHEN p_day = 5 THEN 'Freitag'
+                   WHEN p_day = 6 THEN 'Samstag'
+                   WHEN p_day = 7 THEN 'Sonntag'
+                   ELSE 'Bitte geben Sie eine Zahl zwischen 1 und 7 ein.').
+
+"Der Benutzer wird informiert, wenn die eingegebene Zahl zwischen 1 und 7 liegt.
+IF p_day BETWEEN 1 AND 7.
+  CONCATENATE TEXT-002 gv_day_2 INTO gv_msg SEPARATED BY space.
+  MESSAGE gv_msg TYPE 'I'.
+ENDIF.
+
+WRITE : / gv_day_1,
+        / gv_day_2.
