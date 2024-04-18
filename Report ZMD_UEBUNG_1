@@ -1,0 +1,44 @@
+*&---------------------------------------------------------------------*
+*& Report ZMD_UEBUNG_1
+*&---------------------------------------------------------------------*
+*&Die WHILE-ENDWHILE -Anweisung funktioniert ähnlich wie die DO_ENDDO-Anweisung.
+*&Die Anweisung, die den darin enthaltenen Code ohne eine Bedingung zu überprüfen
+*&eine bestimmte Anzahl von Malen wiederholt, wird als Do-Enddo definiert.
+*&Wenn nicht angegeben wird, wie oft sie wiederholt werden soll, läuft der darin
+*&enthaltene Code für immer.
+*&Die ABAP-Schleife WHILE ermöglicht die wiederholte Ausführung eines Codeblocks,
+*&solange eine angegebene Bedingung wahr bleibt. Nach jedem Schleifendurchlauf
+*&wird der Zähler um 10 erhöht. Sobald der Zähler den Wert 500 erreicht,
+*&wird die Bedingung counter > 500 ungültig und die Schleife endet.
+*&MESSAGE TEXT-001  Bitte geben Sie eine Zahl kleiner als 500 ein.
+*&MESSAGE TEXT-002  In WHILE_ENDWHILE, bis Sie die Zahl 500 von der eingegebenen Zahl aus erreichen
+*&MESSAGE TEXT-003  WHILE-ENDWHILE erstellt.
+*&---------------------------------------------------------------------*
+REPORT zmd_uebung_01.
+
+""Ein Parameter wird definiert und eine Nummer vom Benutzer empfangen.
+PARAMETERS: p_num_1 TYPE i.
+
+"Erstellung von Definitionen.
+DATA: gv_counter TYPE n LENGTH 3,
+      gv_msg     TYPE string.
+
+"Wenn die eingegebene Zahl kleiner als 500 ist, wird die Mitteilung
+"Bitte geben Sie eine Zahl kleiner als 500 ein" ausgegeben und der Bericht wird abgebrochen.
+IF p_num_1 >= 500.
+  MESSAGE TEXT-001 TYPE 'S' DISPLAY LIKE 'E'.
+ENDIF.
+
+"WHILE-ENDWHILE beginnt und 10 wird hinzugefügt, bis 500 erreicht ist.
+"Zu diesem Zeitpunkt wird die Anzahl der Runden in der Schleife berechnet.
+WHILE p_num_1 < 500.
+
+  p_num_1 = p_num_1 + 10.
+
+  gv_counter = gv_counter + 1.
+
+ENDWHILE.
+
+"Der Benutzer wird mit einer sinnvollen Mitteilung informiert.
+CONCATENATE TEXT-002 gv_counter TEXT-003 INTO gv_msg SEPARATED BY space.
+MESSAGE gv_msg TYPE 'I'.
