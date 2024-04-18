@@ -1,0 +1,119 @@
+*&---------------------------------------------------------------------*
+*& Report ZMD_UEBUNG_7
+*&---------------------------------------------------------------------*
+*&Dieser Code erstellt eine Datenstruktur (gty_structure) und eine interne Tabelle (gt_table),
+*&um Fahrzeuginformationen zu speichern. Dann werden mehrere Zeilen mit Fahrzeugdaten erstellt
+*&und der internen Tabelle hinzugefügt. Einzelne Zeilen werden gelesen, auf dem Bildschirm angezeigt,
+*&aktualisiert und erneut angezeigt.
+*&Der Zweck dieses Codes besteht darin, eine Struktur für Fahrzeugdaten zu definieren,
+*&mehrere Zeilen von Fahrzeugdaten zu erstellen, diese zu verwalten und zu aktualisieren
+*&sowie die Aktualisierungen auf dem Bildschirm anzuzeigen.
+*&---------------------------------------------------------------------*
+REPORT zmd_uebung_07.
+
+"Eine Datenstruktur (gty_structure) wird definiert, um Informationen über Fahrzeuge zu speichern.
+"Ich erstelle TYPE für Zeilen- und interne Tabellendefinitionen.
+TYPES: BEGIN OF gty_structure,
+         kennzeichen_nr  TYPE c LENGTH 10,
+         marke           TYPE c LENGTH 20,
+         modell          TYPE string,
+         farbe           TYPE c LENGTH 12,
+         motor_cc        TYPE n LENGTH 4,
+         produktion_jahr TYPE c LENGTH 4,
+         preis           TYPE i,
+         kilometerstand  TYPE i,
+       END OF gty_structure.
+
+"Es werden Variablen für eine Zeile (gs_structure) und eine interne Tabelle (gt_table) deklariert.
+DATA: gs_structure TYPE gty_structure,
+      gt_table     TYPE TABLE OF gty_structure.
+
+"Hier beginnt der eigentliche Verarbeitungsteil des Programms.
+
+START-OF-SELECTION.
+  "Mehrere Zeilen von Fahrzeugdaten werden erstellt und der internen Tabelle hinzugefügt.
+  gs_structure-kennzeichen_nr  = '34 AB 2025'.
+  gs_structure-marke           = 'Citroen'.
+  gs_structure-modell          = 'Picasso'.
+  gs_structure-farbe           = 'Dunkelblau'.
+  gs_structure-motor_cc        = 1600.
+  gs_structure-produktion_jahr = '2015'.
+  gs_structure-preis           = 15000.
+  gs_structure-kilometerstand  = 80000.
+
+  APPEND gs_structure TO gt_table.
+  CLEAR: gs_structure.
+
+  gs_structure-kennzeichen_nr  = '23 DE 3476'.
+  gs_structure-marke           = 'volvo'.
+  gs_structure-modell          = 'S40'.
+  gs_structure-farbe           = 'Weiß'.
+  gs_structure-motor_cc        = 2000.
+  gs_structure-produktion_jahr = '2020'.
+  gs_structure-preis           = 14000.
+  gs_structure-kilometerstand  = 50000.
+
+  APPEND gs_structure TO gt_table.
+  CLEAR: gs_structure.
+
+  gs_structure-kennzeichen_nr  = '56 TR 2837'.
+  gs_structure-marke           = 'Renault'.
+  gs_structure-modell          = 'Broadway'.
+  gs_structure-farbe           = 'Grau'.
+  gs_structure-motor_cc        = 1400.
+  gs_structure-produktion_jahr = '1995'.
+  gs_structure-preis           = 1000.
+  gs_structure-kilometerstand  = 300000.
+
+  APPEND gs_structure TO gt_table.
+  CLEAR: gs_structure.
+
+  gs_structure-kennzeichen_nr  = '47 KH 2894'.
+  gs_structure-marke           = 'Mercedes'.
+  gs_structure-modell          = 'C180'.
+  gs_structure-farbe           = 'Creme'.
+  gs_structure-motor_cc        = 1800.
+  gs_structure-produktion_jahr = '2018'.
+  gs_structure-preis           = 20000.
+  gs_structure-kilometerstand  = 70000.
+
+  APPEND gs_structure TO gt_table.
+  CLEAR: gs_structure.
+
+  gs_structure-kennzeichen_nr  = '16 ZR 9687'.
+  gs_structure-marke           = 'Audi'.
+  gs_structure-modell          = 'A3'.
+  gs_structure-farbe           = 'Schwarz'.
+  gs_structure-motor_cc        = 2000.
+  gs_structure-produktion_jahr = '2014'.
+  gs_structure-preis           = 4000.
+  gs_structure-kilometerstand  = 120000.
+
+  APPEND gs_structure TO gt_table.
+  CLEAR: gs_structure.
+
+  "Jeweils eine Zeile aus der internen Tabelle wird gelesen, auf dem Bildschirm angezeigt,
+  "aktualisiert (Kilometerstand und Farbe werden geändert) und wieder in die Tabelle geschrieben.
+  READ TABLE gt_table INTO gs_structure INDEX 4.
+  IF sy-subrc IS INITIAL.
+    WRITE: gs_structure-kennzeichen_nr,  gs_structure-marke,  gs_structure-modell, gs_structure-farbe,
+           gs_structure-motor_cc, gs_structure-produktion_jahr, gs_structure-preis, gs_structure-kilometerstand.
+
+    SKIP.
+    ULINE.
+
+    gs_structure-kilometerstand  = gs_structure-kilometerstand + 10000.
+    gs_structure-farbe      = 'Schwarz'.
+
+    MODIFY gt_table FROM gs_structure INDEX 4.
+    CLEAR: gs_structure.
+  ENDIF.
+
+  "Die aktualisierte Zeile wird erneut gelesen und auf dem Bildschirm angezeigt,
+  "um die Änderungen zu überprüfen und ich sehe den Unterschied.
+  READ TABLE gt_table INTO gs_structure INDEX 4.
+  IF sy-subrc IS INITIAL.
+    WRITE: gs_structure-kennzeichen_nr,  gs_structure-marke,  gs_structure-modell, gs_structure-farbe,
+           gs_structure-motor_cc, gs_structure-produktion_jahr, gs_structure-preis, gs_structure-kilometerstand.
+
+  ENDIF.
