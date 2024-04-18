@@ -1,0 +1,40 @@
+*&---------------------------------------------------------------------*
+*& Report ZMD_UEBUNG_5
+*&---------------------------------------------------------------------*
+*&PARAMETER DEFINITION IN DATE TYPE - DO ENDDO
+*&Dieser Code hat den Zweck, die Anzahl der Tage zwischen zwei eingegebenen
+*&Datumsangaben zu ermitteln und diese Information dem Benutzer mitzuteilen.
+*&---------------------------------------------------------------------*
+REPORT zmd_uebung_05.
+
+"Zwei Parameter werden definiert, um die beiden Datumsangaben vom Benutzer zu erhalten.
+PARAMETERS : p_date1 TYPE datum,
+             p_date2 TYPE datum.
+
+DATA : gv_counter TYPE n LENGTH 3.
+
+"Überprüft, ob das erste eingegebene Datum größer oder gleich dem zweiten eingegebenen
+"Datum ist. Wenn ja, wird dem Benutzer eine Fehlermeldung angezeigt und das Programm beendet.
+IF p_date1 >= p_date2.
+  MESSAGE 'Das erste eingegebene Datum muss kleiner sein als das zweite eingegebene Datum' TYPE 'S' DISPLAY LIKE 'E'.
+  EXIT.
+ENDIF.
+
+"Eine Schleife wird gestartet, um die Tage zwischen den beiden Datumsangaben zu zählen.
+"In einer Do-Schleife addiere ich 1 zum ersten eingegebenen Datum.
+"In jedem Schleifendurchlauf wird das erste Datum um einen Tag erhöht, und
+"dabei wird gezählt, wie viele Schleifendurchläufe (Tage) stattfinden,
+"bis das zweite Datum erreicht ist. Sobald ich das zweite eingegebene Datum erreicht habe,
+"beende ich die Do-Schleife.
+DO.
+  p_date1 = p_date1 + 1.
+
+  gv_counter = gv_counter + 1.
+
+  IF p_date1 = p_date2.
+    EXIT.
+  ENDIF.
+ENDDO.
+
+"Gibt dem Benutzer die Anzahl der Tage zwischen den beiden eingegebenen Daten aus.
+WRITE: 'Zwischen zwei eingegebenen Daten', gv_counter,'Tage sind verfügbar.'.
