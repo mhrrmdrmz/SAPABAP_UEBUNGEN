@@ -1,0 +1,125 @@
+*&---------------------------------------------------------------------*
+*& Report ZDM_UEBUNG_14
+*&---------------------------------------------------------------------*
+*&Dieser ABAP-Code dient dazu, ein Adobe-Formular zu generieren und es
+*&anschließend per E-Mail zu versenden. Hier ist eine kurze Erläuterung des Zwecks:
+*&Zunächst werden die erforderlichen Daten aus verschiedenen Tabellen abgerufen,
+*&um das Adobe-Formular mit den relevanten Informationen zu füllen.
+*&Ein Funktionsbaustein wird verwendet, um das Adobe-Formular zu generieren und
+*&die Ausgabe in einer PDF-Struktur zu erhalten.
+*&Ein BCS (Business Communication Service) Objekt wird erstellt, um die E-Mail zu konfigurieren
+*& und vorzubereiten. Die generierte PDF-Datei wird in das BCS-Dokument eingefügt,
+*&das als Anhang für die E-Mail verwendet wird.
+*&Ein Empfänger für die E-Mail wird definiert und dem BCS-Objekt hinzugefügt.
+*&Schließlich wird die E-Mail gesendet und das Ergebnis überprüft, um sicherzustellen,
+*&dass die E-Mail erfolgreich versendet wurde. Dieser Code ermöglicht es Ihnen,
+*&automatisch Adobe-Formulare zu erstellen und per E-Mail zu versenden, was besonders nützlich ist,
+*&wenn Sie Berichte oder Dokumente an Benutzer oder Kunden verteilen müssen.
+*&---------------------------------------------------------------------*
+REPORT zmd_uebung_14.
+
+
+DATA : gs_data        TYPE zdm_s_adobeform_fdm2,
+       gs_outparams   TYPE sfpoutputparams,
+       gv_funcname    TYPE funcname,
+       gs_pdf         TYPE fpformoutput,
+       gt_data_binary TYPE TABLE OF sdokcntbin,
+       gv_filename    TYPE string,
+       gv_path        TYPE string,
+       gv_fullpath    TYPE string,
+       gv_pdf_size    TYPE so_obj_len.
+
+SELECTION-SCREEN BEGIN OF BLOCK a1 WITH FRAME TITLE TEXT-001 NO INTERVALS.
+PARAMETERS : p_carrid TYPE s_carr_id,
+             p_email  TYPE adr6-smtp_addr.
+SELECTION-SCREEN END OF BLOCK a1.
+
+START-OF-SELECTION.
+
+  SELECT SINGLE * FROM scarr   INTO gs_data-scarr         WHERE carrid = p_carrid.
+  SELECT *        FROM spfli   INTO TABLE gs_data-spfli   WHERE carrid = p_carrid.
+  SELECT *        FROM sflight INTO TABLE gs_data-sflihgt WHERE carrid = p_carrid.
+
+
+  "Entfernen Sie das LP01-Fenster.
+  gs_outparams-getpdf = abap_true.
+
+
+  "Job für PDF-Erstellung öffnen.
+  CALL FUNCTION 'FP_JOB_OPEN'
+    CHANGING
+      ie_outputparams = gs_outparams
+    EXCEPTIONS
+      cancel          = 1
+      usage_error     = 2
+      system_error    = 3
+      internal_error  = 4
+      OTHERS          = 5.
+
+  CALL FUNCTION 'FP_FUNCTION_MODULE_NAME'
+    EXPORTING
+      i_name     = 'ZDM_ADOBE_FORM_FDM'
+    IMPORTING
+      e_funcname = gv_funcname.
+
+
+  CALL FUNCTION gv_funcname
+    EXPORTING
+      is_input           = gs_data
+    IMPORTING
+      /1bcdwb/formoutput = gs_pdf
+    EXCEPTIONS
+      usage_error        = 1
+      system_error       = 2
+      internal_error     = 3
+      OTHERS             = 4.
+
+  IF sy-subrc IS NOT INITIAL.
+    BREAK-POINT.
+  ENDIF.
+
+  CALL FUNCTION 'FP_JOB_CLOSE'
+    EXCEPTIONS
+      usage_error    = 1
+      system_error   = 2
+      internal_error = 3
+      OTHERS         = 4.
+
+  "Das System wird über eine Sendung benachrichtigt.
+  TRY.
+      DATA(go_send_request) = cl_bcs=>create_persistent( ).
+    CATCH cx_send_req_bcs.
+      BREAK-POINT.
+*      MESSAGE
+  ENDTRY.
+
+
+  gv_pdf_size = xstrlen( gs_pdf-pdf ).
+
+  "Den Inhalt des Dokuments in eine Tabelle vom Typ SOLIX einfügen.
+  DATA(gt_pdf_content) = cl_document_bcs=>xstring_to_solix( ip_xstring = gs_pdf-pdf ).
+
+  "Erstellen Sie ein PDF-Dokument, das Sie als E-Mail-Anhang versenden können.
+  DATA(go_document) = cl_document_bcs=>create_document( EXPORTING i_type         = 'PDF'
+                                                                  i_subject      = 'Details können in der Datei angesehen werden.'
+                                                                  i_length       = gv_pdf_size
+                                                                  i_hex          = gt_pdf_content ).
+
+  "Anhängen des Dokument in den Versandauftrag.
+  go_send_request->set_document( i_document = go_document ).
+
+  "Erstellen Sie einen Empfänger.
+  DATA(go_recipient) = cl_cam_address_bcs=>create_internet_address( i_address_string = p_email ).
+
+  "Geben Sie den Empfänger im Versandauftrag an.
+  go_send_request->add_recipient(  EXPORTING i_recipient  = go_recipient ).
+
+  "Senden Sie die E-Mail und erhalten Sie das Ergebnis.
+  DATA(gv_sent) = go_send_request->send( i_with_error_screen = abap_true ).
+
+  "eine Mitteilung entsprechend dem Ergebnis.
+  IF gv_sent IS NOT INITIAL.
+    MESSAGE 'E-Mail gesendet' TYPE 'S'.
+  ELSE.
+    MESSAGE 'Erfolglose' TYPE 'S' DISPLAY LIKE 'E'.
+  ENDIF.
