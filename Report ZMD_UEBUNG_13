@@ -1,0 +1,43 @@
+*&---------------------------------------------------------------------*
+*& Report ZMD_UEBUNG_13.
+*&---------------------------------------------------------------------*
+*&Dieser SAP-ABAP-Code dient dazu, je nach ausgewählter Tabelle verschiedene
+*&ALV-Berichte (ALV: Anzeige- und Bearbeitungsmodus) anzuzeigen.
+*&Insgesamt ermöglicht der Code die Auswahl einer Tabelle und führt dann
+*&entsprechende Berichte aus, um ALV-Darstellungen der Daten dieser Tabellen anzuzeigen.
+*&---------------------------------------------------------------------*
+REPORT ZMD_UEBUNG_13.
+
+"Es wird eine Variable gv_carrid vom Typ s_carr_id definiert.
+DATA: gv_carrid TYPE s_carr_id.
+
+"Ein Auswahlbildschirmblock (BLOCK) mit dem Titel TEXT-001 wird erstellt.
+"Dieser Block enthält einen Parameter p_table vom Typ tabname sowie eine Selektionsoption
+"so_carr für die Variable gv_carrid.
+SELECTION-SCREEN BEGIN OF BLOCK a1 WITH FRAME TITLE TEXT-001.
+  PARAMETERS: p_table TYPE tabname.
+
+  SELECT-OPTIONS: so_carr FOR gv_carrid.
+SELECTION-SCREEN END OF BLOCK a1.
+
+"Im START-OF-SELECTION-Block wird eine Fallunterscheidung (CASE) durchgeführt,
+"um je nach Wert des Parameters p_table verschiedene Berichte zu erstellen:
+"Wenn p_table den Wert 'SCARR' hat, wird der Bericht zdm_test_227 mit den ausgewählten
+"Werten für so_carr ausgeführt, und eine Erfolgsmeldung wird angezeigt.
+"Wenn p_table den Wert 'SPFLI' hat, wird der Bericht zdm_test_228 mit den ausgewählten
+"Werten für so_carr ausgeführt, und eine Erfolgsmeldung wird angezeigt.
+"Wenn p_table den Wert 'SFLIGHT' hat, wird der Bericht zdm_test_229 mit den ausgewählten
+"Werten für so_carr ausgeführt, und eine Erfolgsmeldung wird angezeigt.
+START-OF-SELECTION.
+
+  CASE p_table.
+    WHEN 'SCARR'.
+      SUBMIT zdm_test_227 WITH so_car_1 IN so_carr AND RETURN.
+      MESSAGE 'Die ALV der SCARR-Tabelle ist angezeigt.' TYPE 'S'.
+    WHEN 'SPFLI'.
+      SUBMIT zdm_test_228 WITH so_car_2 IN so_carr AND RETURN.
+      MESSAGE 'Die ALV der SPFLI-Tabelle ist angezeigt.' TYPE 'S'.
+    WHEN 'SFLIGHT'.
+      SUBMIT zdm_test_229 WITH so_car_3 IN so_carr AND RETURN.
+      MESSAGE 'Die ALV der SFLIGHT-Tabelle ist angezeigt.' TYPE 'S'.
+  ENDCASE.
