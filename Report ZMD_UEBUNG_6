@@ -1,0 +1,49 @@
+*&---------------------------------------------------------------------*
+*& Report ZMD_UEBUNG_6
+*&---------------------------------------------------------------------*
+*&Der Zweck dieses Codes besteht darin, dem Benutzer die Möglichkeit zu geben,
+*&zwei Zahlen und ein mathematisches Symbol einzugeben, um dann die entsprechende
+*&arithmetische Operation  durchzuführen und das Ergebnis anzuzeigen.
+*&MESSAGE TEXT-001  Sie haben ein ungültiges Transaktionssymbol eingegeben!
+*&MESSAGE TEXT-002  Das Ergebnis Ihrer Operation:
+*&---------------------------------------------------------------------*
+REPORT zmd_uebung_06.
+
+"Der Benutzer erhält 2 Zahlen und 1 Operationssymbol.
+PARAMETERS : p_num_1  TYPE i,
+             p_num_2  TYPE i,
+             p_mthsym TYPE c LENGTH 1.
+
+"Es werden Variablen für das Ergebnis der Operation (gv_result) und eine
+"Zeichenfolge (gv_result_string) zur Formatierung des Ergebnisses deklariert.
+DATA : gv_result        TYPE p DECIMALS 2,
+       gv_result_string TYPE string,
+       gv_msg           TYPE string.
+
+" In Abhängigkeit vom eingegebenen mathematischen Symbol (p_mthsym) wird
+"die entsprechende arithmetische Operation durchgeführt.
+"Wenn ein ungültiges Symbol eingegeben wird, wird dem Benutzer eine Fehlermeldung angezeigt
+"und das Programm beendet.
+IF p_mthsym = '+'.
+  gv_result = p_num_1 + p_num_2.
+ELSEIF p_mthsym = '*'.
+  gv_result = p_num_1 * p_num_2.
+ELSEIF  p_mthsym = '/'.
+  gv_result = p_num_1 / p_num_2.
+ELSEIF p_mthsym = '-'.
+  gv_result = p_num_1 - p_num_2.
+ELSE.
+  MESSAGE TEXT-001 TYPE 'S' DISPLAY LIKE 'E'.
+  EXIT.
+ENDIF.
+
+"Um den Befehl Concatenate zu verwenden, speichern wir das Ergebnis in einer Variablen vom Typ STRING.
+gv_result_string = gv_result.
+
+"Ich erstelle einen sinnvollen Mitteilungstext und informiere den Benutzer.
+"Das Ergebnis der Operation wird in eine Zeichenfolge konvertiert,
+"um es mit einer aussagekräftigen Nachricht zu verbinden.
+CONCATENATE TEXT-002 gv_result_string INTO gv_msg SEPARATED BY space.
+MESSAGE gv_msg TYPE 'S'.
+
+WRITE: gv_result.
