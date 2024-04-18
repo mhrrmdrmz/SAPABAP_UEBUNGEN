@@ -1,0 +1,190 @@
+*&---------------------------------------------------------------------*
+*& Report ZMD_ABAPSAPKURSE_INHALT
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT ZMD_ABAPSAPKURSE_INHALT.
+
+"ERHALTENE SAP ABAP KURSINHALTE
+
+"EINGANG
+"1. Transaktionscode-Konzept
+"2. Wie greife ich auf den Workbench-Editor zu?
+"3. Erster Transaktionscode: SE38
+"3.1. SE38-Code in den Favoriten speichern .
+"3.2. Ein neues Programm erstellen
+"3.2.1. Standard- und Custom Objektkonzepte
+"3.2.2. Titel- und Typkonzepte
+"3.2.3. Lokales Objektkonzept
+"3.3. Write-, Uline- und Skip-Befehle und ihre Verwendungsbereiche
+"3.3.1. Write- befehl
+"3.3.1.1. Syntax-Check-Konzept
+"3.3.1.2. Activate Konzept
+"3.3.1.3. Direct Processing Konzept
+"3.3.1.4. Zur nächsten Zeile im Write befehl wechseln
+"3.3.2. Uline- und Skip-Befehle
+"3.4. Erstellen eines Transaktionscodes für den Bericht
+"3.5. Variablendefinition (Variablen)
+"3.5.1. Typ-C-Variablen
+"3.5.2. Typ-N-Variablen
+"3.5.3. Typ-I-Variablen
+"3.5.4. Typ-P-Variablen (Packed Number)
+"3.5.5. Typ STRING-Variablen
+"3.5.6. Typ-Datum-Variablen
+"3.5.7. Typ-Uzeit-Variablen
+"3.6. Constant Command und seine Verwendung
+"3.7. Concatenate Command und seine Verwendung
+"3.8. Condense Command und seine Verwendung
+"3.9. Replace Command und seine Verwendung
+"3.11.Shift Command und seine Verwendung
+"3.13. Split Command und seine Verwendung
+"3.14. Translate und seine Verwendung
+"3.15. Parameters und seine Verwendung
+"3.15.1. Parameterdefinition
+"3.15.1.1. Parameter vom Variablentyp
+"3.15.1.2. Radibutton- und Checkbox-Parameter
+"3.15.2. Benennung der Parameter
+"3.16. IF-ENDIF-Befehl und seine Verwendung (IF-Bedingung)
+"3.17. MESSAGEbefehl und seine Verwendung (Senden von MESSAGE)
+"3.17.1. Success Message
+"3.17.2. Information Message
+"3.17.3. Error Message
+"3.17.4. Warning Message
+"3.17.5. Abort Message
+"3.17.6. Exit Message
+"3.18. Textbefehl und seine Verwendung (Textelement)
+"3.18.1. Erstellen eines Textelements
+"3.18.2. Übersetzen eines Textelements in eine andere Sprache
+"3.19. DO-ENDDO-Befehl und seine Verwendung
+"3.20. WHILE-ENDWHILE-Befehl und seine Verwendung
+"3.21. CASE-ENDCASE-Befehl und seine Verwendung
+"3.22. Debug-Bildschirm und Programmanalyse (Break-Point-Befehl)
+"3.23. SELECTION-SCREEN-Befehl und seine Verwendung
+"3.24. Beispielvariante für Bericht speichern
+"4. Konzept der Linie (Strukturen)
+"5. Interne Tabellen
+"5.1. Interner Tabellen
+"5.1.1. LOOP-ENDLOOP-Befehl und seine Verwendung
+"5.1.1.1. Where-Befehl und seine Verwendung
+"5.1.1.2. FROM-TO-Befehl und seine Verwendung
+"5.1.1.3. Continue Befehl und seine Verwendung
+"5.1.1.4. Exit-Befehl und seine Verwendung
+"5.1.1.5. Check-Befehl und seine Verwendung
+"5.1.2. READ TABLE-Befehl
+"5.2. Ändern und Löschen einer Zeile in der internen Tabelle
+"5.3. Interne Standardtabellen, sortierte und gehashte Tabellen und SORT-Befehl
+"6. Transaktionscode SE11 (Struktur- und Datenbanktabellen)
+"6.1. Struktur erstellen (SE11) und in einem Beispielbericht verwenden
+"6.2. Datenbanktabellen (SE11)
+"6.3. CUDR-Operationen auf Datenbanktabellen
+"6.3.1. Table Maintenance Generator
+"6.3.2. SELECT-Befehl
+"6.3.3. Insert Befehl
+"6.3.4. Update ---Set – Befehl
+"6.3.5. DELETE Befehl
+"6.4. Ein Datenelement erstellen und in der Datenbanktabelle verwenden
+"6.5. Erstellen einer Domain
+"6.6. Erstellen eines Tabellentyps
+"7. Befehle „Select-Options“, „Type Range Of“ und „For All Entries“
+"7.1. Select Options
+"7.2. Type Range Of
+"7.3. For All Entries
+"8. Encapsulation -1 (Perform Befehl)
+"9. Encapsulation -2 ((Include  Erstellung)
+"10. Transaktionscode SE37 (Funktionen)
+"11. Abap List Viewer (ALV)
+"11.1. Kombination aus REUSE_ALV_FIELDCATALOG_MERGE und REUSE_ALV_GRID_DISPLAY
+"11.1.1. Fieldkatalogspalten und -funktionen
+"11.1.1.1. COL_POS
+"11.1.1.2. KEY COLUMN
+"11.1.1.3. CHECKBOX
+"11.1.1.4. . JUST
+"11.1.1.5. LZERO-
+"11.1.1.6. NO_ZERO
+"11.1.1.7. „EMPHASIZE“
+"11.1.1.8. FIX_COLUMN
+"11.1.1.9. NO_OUT-Spalte
+"11.1.1.10. LOWERCASE
+"11.1.1.11. EDIT
+"11.1.1.12. HOTSPOT
+"11.1.2. Anlegen einer Auswahlbox im ALV
+"11.1.3. Erstellen einer Schaltfläche zur Verwendung in ALV-1 (Custom PF-Status)
+"11.1.4. Erstellen einer Schaltfläche zur Verwendung in ALV-2 (PF-Status kopieren)
+"11.2. Kombination aus LVC_FIELDCATALOG_MERGE und REUSE_ALV_GRID_DISPLAY_LVC
+"11.3. Erstellen eines ALV durch Generieren eines Feldkatalogs ohne Verwendung einer Datenbanktabelle
+
+"12. Transaktionscode SE24 (Klassenkonzept)
+"12.1. Instance  Public Method
+"12.2. Instance Protected Method
+"12.3. Static  Public Method
+"12.4. Static  Protected Method
+"12.5. Konzept der Constructor  Methode
+"12.5.1.Instance – Public Constructor Method
+"12.5.2. Static – Public Constructor Method
+"13. Lokale Klasse definieren und verwenden
+"14. Deep Structure Konzept
+"15. Container-ALV
+"15.1. ALV erstellen mit Klasse
+"15.2. Erstellen einer Custom Button
+"15.3. Spaltenfärbung
+"15.4. Linienfärbung
+"15.5. Zellfärbung
+"15.6. Filtern der Tabelle anhand der ausgewählten Zelle
+"15.7. Spalte nach ausgewählter Zelle sortieren
+"15.8. Ampeln erstellen
+"15.8.1. Erste Version
+"15.8.2. Zweite Version
+"16. Dialog Screen Programmierung
+"17. Abap-Offset-Nutzung und Comparison operatoren
+"17.1. Offset-Nutzung
+"17.2.  Comparison Operatoren
+"17.2.1. CO (Contains Only)
+"17.2.2. CN (Contains Not Only)
+"17.2.3. CA (Contains Any)
+"17.2.4. NA (Contains Not Any)
+"17.2.5. CS (Contains String)
+"17.2.6. NS (Contains No String)
+"17.2.7. CP (Covers Pattern)
+"17.2.8. NP (No Pattern)
+
+"18.Selection-Screen Operationen
+"18.1. Vorgänge ausführen, ohne den Auswahlbildschirm zu verlassen
+"18.2. Ändern der Eigenschaften des Parameters auf dem Selektionsbild
+"18.3. Parameter nebeneinander auf dem Selektionsbild schreiben
+"18.4. Erstellen einer Schaltfläche auf dem Selektionsbildschirm
+"18.5. Erstellen einer Dropdown-Listenzelle auf dem Auswahlbildschirm
+"19. Join Befehl
+"19.1. Inner Join
+"19.2. Left Outer Join
+"19.3. Right Outer Join
+"20. Transaktionscode SE91 (Nachrichtenklasse)
+"20.1. Verwendung der Nachrichtenklasse im Bericht
+"20.2. Nachrichtenklasse innerhalb einer Klasse verwenden
+"20.3. Verwenden der Nachrichtenklasse innerhalb einer Funktion
+"21. Transaktionscode SLG0 und SLG1 (Protokollierung)
+"22. Submit Befehl (Abrufen eines Berichts innerhalb eines Berichts)
+"22.1. Submit Befehl (einfache Verwendung)
+"22.2. Submit Befehl und Return“
+"22.3. Submit Befehl mit With
+"23. Feldsymbole
+"23.1. Bei der Datentypdefinition ermittelte Feldsymbole
+"23.2. Feldsymbole, deren Datentyp zur Laufzeit bestimmt wird
+"24. Inline-Deklaration
+"24.1. Inline-Deklaration – 1: Objektdefinition mit DATA-Befehl
+"24.2. Inline-Deklaration – 2: Ein Objekt mit dem FIELD-SYMBOL-Befehl definieren
+"25. Abap 7.40 (Weitere Funktionen)
+"25.1. Read Table Befehl
+"25.2. Value Befehl
+"25.3. FOR – IN-Schleife mit Value befehl
+"25.4. Base Befehl
+"25.5. Reduce Befehl
+"25.6. Cond – When – Then – Else Befehl
+"25.7. Corresponding  Befehl
+"25.8. Concatenate Befehl  (Neue Version)
+"25.9. Befehl „Loop At Group“
+"25.10. New Befehl
+"26. Datenreferenzen und dynamische Programmierung
+"27. Change Documents  erstellen
+"28. Verarbeitung mit Excel-Dateien
+"28.1. Excel-Datei importieren
+"128.2. Herunterladen der internen Tabelle als Excel-Datei
